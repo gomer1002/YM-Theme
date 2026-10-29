@@ -1,0 +1,113 @@
+/* ============================================================================
+   YaMusicCustom — ваш файл темы
+   ----------------------------------------------------------------------------
+   Всё, что здесь написано, применяется поверх стилей Яндекс Музыки.
+   Файл читается на лету: сохранили — окно перерисовалось (перезапуск не нужен).
+
+   Приложение задаёт почти всё оформление через CSS-переменные `--ym-*`.
+   Меняя их, вы меняете цвета, радиусы, отступы, тени и типографику сразу
+   во всех разделах. Ниже — палитра и примеры; правьте смело и смотрите,
+   что получается. Если что-то сломалось — верните файл к этому виду.
+
+   Полезно знать:
+     • тёмная тема  -> класс .ym-dark-theme на <html>
+     • светлая тема -> класс .ym-light-theme
+     • `!important` нужен редко: наш CSS подключается последним
+     • Ctrl+Alt+T — быстро выключить/включить тему для сравнения
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   1. РџРђР›РРўР Рђ (С‚С‘РјРЅР°СЏ С‚РµРјР°)
+   Демо: графитово-фиолетовая гамма вместо чёрно-жёлтой.
+   ------------------------------------------------------------------------- */
+html:root,
+body.ym-dark-theme {
+  /* поверхности */
+  --ym-background-color-primary-enabled-basic: #0b0b13;
+  --ym-background-color-primary-enabled-content: #12121d;
+  --ym-background-color-primary-enabled-popover: #1b1b28;
+  --ym-background-color-primary-enabled-player: #16161f;
+  --ym-background-color-primary-enabled-header: rgba(11, 11, 19, 0.55);
+  --ym-background-color-primary-enabled-menu: rgba(27, 27, 40, 0.72);
+  --ym-background-color-primary-enabled-vibe: linear-gradient(180deg, #0b0b13, #171325);
+  --ym-background-color-primary-enabled-overlay: rgba(5, 5, 10, 0.6);
+
+  /* акцент (кнопки, активные элементы, логотип) */
+  --ym-controls-color-primary-default-enabled: #e2793c;
+  --ym-controls-color-primary-default-hovered: #f08a4b;
+  --ym-controls-color-primary-default-pressed: #f7a469;
+  --ym-controls-color-primary-default-disabled: #4a352a;
+  --ym-controls-color-primary-on_default-enabled: #0b0b13;
+  --ym-controls-color-primary-on_default-disabled: #84705f;
+  --ym-controls-color-primary-outline-selected_stroke: #e2793c;
+  --ym-controls-color-primary-outline-hovered_stroke: #f08a4b;
+  --ym-controls-color-primary-text-hovered: #f08a4b;
+  --ym-logo-color-primary-variant: #e2793c;
+  --ym-logo-color-primary-text: #e2793c;
+  --ym-logo-color-primary-player: #e2793c;
+
+  /* тени — чуть глубже, чтобы «плавающие» панели читались на новом фоне */
+  --ym-shadow-l: rgba(0, 0, 0, 0.45);
+  --ym-shadow-xl: rgba(0, 0, 0, 0.55);
+
+  /* полосы прокрутки трека и громкости */
+  --ym-slider-color-primary-enabled: #e2793c;
+  --ym-slider-color-primary-progress: rgba(255, 255, 255, 0.22);
+  --ym-slider-color-primary-disabled: rgba(255, 255, 255, 0.1);
+}
+
+/* ---------------------------------------------------------------------------
+   2. СВЕТЛАЯ ТЕМА (если переключитесь на неё в настройках приложения)
+   ------------------------------------------------------------------------- */
+body.ym-light-theme {
+  --ym-background-color-primary-enabled-basic: #f4f2fb;
+  --ym-background-color-primary-enabled-content: #ffffff;
+  --ym-background-color-primary-enabled-popover: #ffffff;
+
+  --ym-controls-color-primary-default-enabled: #c05621;
+  --ym-controls-color-primary-default-hovered: #d0692f;
+  --ym-controls-color-primary-default-pressed: #9c3f14;
+  --ym-controls-color-primary-on_default-enabled: #ffffff;
+  --ym-controls-color-primary-outline-selected_stroke: #c05621;
+  --ym-controls-color-primary-text-hovered: #c05621;
+  --ym-logo-color-primary-variant: #c05621;
+  --ym-logo-color-primary-text: #c05621;
+}
+
+/* ---------------------------------------------------------------------------
+   3. Р¤РћР РњРђ Р РћРўРЎРўРЈРџР«
+   Крупнее скругления — мягче вид. Уменьшите значения, если хочется строже.
+   ------------------------------------------------------------------------- */
+html:root {
+  --ym-radius-size-s: 0.5rem;
+  --ym-radius-size-m: 0.75rem;
+  --ym-radius-size-l: 1rem;
+  --ym-radius-size-xl: 1.25rem;
+}
+
+/* ---------------------------------------------------------------------------
+   4. РњР•Р›РћР§Р
+   ------------------------------------------------------------------------- */
+/* аккуратный скроллбар вместо системного */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(226, 121, 60, 0.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(226, 121, 60, 0.55);
+  background-clip: content-box;
+}
+
+/* синее свечение выделения — в тон акценту */
+::selection {
+  background: rgba(226, 121, 60, 0.35);
+}

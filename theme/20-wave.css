@@ -1,0 +1,467 @@
+/* ==========================================================================
+   «Моя волна» — классический плеер и прямой список жанров
+   --------------------------------------------------------------------------
+   Порядок правил:
+     1. колесо жанров: узкая колонка, прямой список, компактные строки
+     2. подпись режима над обложкой (пилюля с крестиком)
+     3. сетка плеера: обложка, исполнитель, название, шкала, кнопки
+     4. обложка и заглушка, пока ничего не играет
+     5. название трека, шкала, таймкод
+     6. кнопки; кнопка play в цвет акцента
+     7. фон: свечение и приглушённая заливка от обложки
+     8. плашка версии, всплывашка громкости
+     9. бегущая строка (@keyframes + классы ymc-marquee)
+
+   Классы приложения содержат хеш сборки (VibePage_meta__kWwRE), поэтому
+   селекторы написаны через [class*='...'] и data-test-id — они переживают
+   обновления Музыки.
+   ========================================================================== */
+
+[class*='VibePage_root'] {
+
+  --ymc-cover: min(48vh, 24rem, calc(100vh - 23rem));
+  --ymc-gap: 0.625rem;
+  --ymc-wheel: 15rem;
+
+  display: grid !important;
+  grid-template: 'wheel meta' 1fr / var(--ymc-wheel) minmax(0, 1fr) !important;
+  place-items: stretch !important;
+  column-gap: 1.25rem;
+}
+
+[class*='VibePage_root'] > section.swiper {
+  display: block !important;
+  grid-area: wheel;
+  align-self: stretch;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden !important;
+  touch-action: pan-y !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+  padding-inline: 0.25rem;
+}
+[class*='WheelDesktop_wrapper'] {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  max-width: none !important;
+}
+[class*='WheelDesktop_root'] .swiper-slide {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+[class*='WheelDesktopItem_root'] {
+  width: 100%;
+}
+[class*='WheelItem_root'] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.75rem;
+  transition: background-color 0.15s ease;
+}
+[class*='WheelItem_root']:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+.swiper-slide-active [class*='WheelItem_root'] {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+[class*='WheelItem_coverContainer'] {
+  flex: 0 0 auto;
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+}
+[class*='WheelItem_coverContainer'] img {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+[class*='WheelDesktop_root'] [class*='PlayButtonWithCover_control'] {
+  opacity: 0 !important;
+  transition: opacity 0.15s ease;
+}
+[class*='WheelDesktop_root'] [class*='WheelItem_root']:hover [class*='PlayButtonWithCover_control'] {
+  opacity: 1 !important;
+}
+[class*='WheelDesktop_root'] [class*='PlayButtonWithCover_playButton'] {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+[class*='WheelDesktop_root'] [class*='PlayButtonWithCover_playButtonIcon'] {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+[class*='WheelItem_entityMeta'] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+[data-test-id='WHEEL_ITEM_TITLE'] {
+  display: -webkit-box !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.0625rem !important;
+  font-weight: 500 !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal !important;
+  text-align: start;
+}
+.swiper-slide-active [data-test-id='WHEEL_ITEM_TITLE'] {
+  color: #fff !important;
+}
+
+[class*='VibePage_artistCover'],
+[class*='VibePage_words'] {
+  display: none !important;
+}
+
+[class*='VibePage_meta'] {
+  display: grid !important;
+  grid-template-columns: repeat(4, auto) !important;
+  grid-template-areas:
+    'context context context context'
+    'cover cover cover cover'
+    'artist artist artist artist'
+    'title title title title'
+    'seek seek seek seek'
+    'time time time time'
+    'controls controls controls controls'
+    'volume dislike like menu' !important;
+  align-content: safe center !important;
+  align-items: center !important;
+  justify-content: center !important;
+  justify-items: center !important;
+  column-gap: 1.125rem !important;
+  row-gap: var(--ymc-gap) !important;
+  padding: 1.25rem !important;
+  height: 100% !important;
+}
+
+[class*='VibePage_context'] {
+  grid-area: context;
+  position: static !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  max-width: var(--ymc-cover);
+  margin-block-end: 0.125rem;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: auto !important;
+  z-index: 2;
+}
+[class*='VibeResetButton_container'] {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  transition: background-color 0.15s ease;
+}
+[class*='VibeResetButton_container']:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+[data-test-id='RESET_VIBE_CONTEXT_STATIC_TEXT'] {
+  font-size: 0.6875rem !important;
+  line-height: 0.875rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.62) !important;
+  -webkit-line-clamp: 1 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(var(--ymc-cover) - 3rem);
+}
+
+[class*='VibePage_entityMeta'],
+[class*='VibePage_entityMetaBody'],
+[class*='VibePage_textContainer'],
+[class*='VibeDynamicArtists_root'],
+[class*='VibePage_playerBlock'],
+[data-test-id='VIBE_PLAYERBAR'],
+[class*='VibePlayerBar_progress'],
+[class*='VibePlayerbarMeta_root'],
+[class*='VibePlayerbarMeta_center'],
+[class*='VibePlayerBar_progress'] > div:not([class]) {
+  display: contents !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+}
+
+[class*='VibePlayerbarMeta_center']::before,
+[class*='VibePlayerbarMeta_center']::after {
+  display: none !important;
+  content: none !important;
+}
+
+[class*='VibePlayerbarMeta_explicitMarkContainer'] {
+  display: none !important;
+}
+
+[class*='VibePage_albumCover'] {
+  grid-area: cover;
+  position: relative !important;
+  inset: auto !important;
+  width: var(--ymc-cover) !important;
+  height: var(--ymc-cover) !important;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 1.5rem 3.5rem rgba(0, 0, 0, 0.55);
+  margin-block-end: 0.25rem;
+}
+[class*='VibePage_albumCover'] [class*='AlbumCover_'] {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0 !important;
+}
+
+[class*='VibePage_albumCover']:not(:has(img)) {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02) 65%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1.5rem 3.5rem rgba(0, 0, 0, 0.45);
+}
+[class*='VibePage_albumCover']:not(:has(img))::after {
+
+  content: '\266A';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  color: rgba(255, 255, 255, 0.18);
+}
+[class*='VibePage_albumCover'] img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  display: block;
+}
+
+[class*='VibeDynamicArtists_root'] > * {
+  grid-area: artist;
+  display: block !important;
+  max-width: var(--ymc-cover);
+  font-size: 1.375rem !important;
+  line-height: 1.5rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  text-align: center !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+[class*='VibeDynamicArtists_root'] > * * {
+  font-size: inherit !important;
+  line-height: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: inherit !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  background: none !important;
+  -webkit-line-clamp: 1 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: inline !important;
+}
+
+[data-test-id='VIBE_PLAYERBAR_TRACK_NAME'] {
+  grid-area: title;
+  display: block !important;
+  height: auto !important;
+  width: auto !important;
+  max-width: var(--ymc-cover);
+  margin-block: 0.375rem 0.5rem;
+  font-size: 1.625rem !important;
+  line-height: 2rem !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  text-align: center !important;
+  animation: none !important;
+
+  opacity: 1 !important;
+}
+[data-test-id='VIBE_PLAYERBAR_TRACK_NAME'] > [aria-hidden='true'] {
+  display: none !important;
+}
+[data-test-id='VIBE_PLAYERBAR_TRACK_NAME'] * {
+  font-size: inherit !important;
+  line-height: inherit !important;
+  font-weight: inherit !important;
+  color: inherit !important;
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 1 !important;
+}
+[data-test-id='VIBE_PLAYERBAR_TRACK_NAME'] {
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+input[class*='VibePlayerbarMeta_slider'] {
+  grid-area: seek;
+  position: relative !important;
+  inset: auto !important;
+  opacity: 1 !important;
+  display: block !important;
+  width: var(--ymc-cover) !important;
+  height: 1.125rem !important;
+  pointer-events: auto !important;
+}
+input[class*='VibePlayerbarMeta_slider']::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+[data-test-id='VIBE_PLAYERBAR_TIMECODE'] {
+  grid-area: time;
+  position: static !important;
+  opacity: 1 !important;
+  display: block !important;
+  font-family: inherit !important;
+  font-size: 0.75rem !important;
+  line-height: 1rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+[class*='VibePlayerControls_root'] {
+  grid-area: controls;
+  display: flex !important;
+  align-items: center !important;
+  gap: 1.5rem !important;
+  margin: 0.25rem 0 0 !important;
+}
+[class*='ChangeVolume_root'] {
+  grid-area: volume;
+}
+[data-test-id='DISLIKE_BUTTON'] {
+  grid-area: dislike;
+}
+[data-test-id='LIKE_BUTTON'] {
+  grid-area: like;
+}
+[data-test-id='VIBE_CONTEXT_MENU_BUTTON'] {
+  grid-area: menu;
+}
+
+button[class*='VibePlayerControls_playButton'] {
+  background-color: var(--ym-logo-color-primary-player) !important;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.35);
+}
+button[class*='VibePlayerControls_playButton'] svg {
+  background: none !important;
+  color: #000 !important;
+}
+
+[class*='VibePage_bigCardPanelBackground'] {
+  display: none !important;
+}
+[class*='VibeWidgetAnimation_root'] {
+  display: block !important;
+  position: fixed !important;
+  inset-block-start: 50% !important;
+  inset-inline-start: 50% !important;
+  width: 135vh !important;
+  height: 135vh !important;
+  transform: translate(-50%, -50%) !important;
+  opacity: 0.32 !important;
+  mix-blend-mode: screen !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+[class*='VibePage_root']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    55% 50% at 50% 32%,
+    color-mix(in srgb, var(--ym-logo-color-primary-player) 10%, transparent),
+    transparent 72%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+[class*='MainPage_betaSlot'] {
+  position: fixed !important;
+  inset: auto auto 0.25rem 0.75rem !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 5;
+  opacity: 0.55;
+}
+[class*='MainPage_betaSlot'] button,
+[class*='MainPage_betaSlot'] * {
+  font-size: 0.625rem !important;
+  line-height: 0.875rem !important;
+  min-width: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+}
+
+[class*='CommonLayout_root'] {
+  background-color: var(--ym-background-color-primary-enabled-basic, #0b0b13) !important;
+  background-blend-mode: multiply !important;
+}
+
+[class*='ChangeVolume_wrapperSlider'] {
+  background-color: rgba(14, 11, 18, 0.95) !important;
+  box-shadow:
+    0 0.5rem 1.5rem rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  transform: scale(0.68);
+  transform-origin: bottom center;
+}
+
+@keyframes ymc-marquee-x {
+  0%,
+  10% {
+    transform: translateX(0);
+  }
+  90%,
+  100% {
+    transform: translateX(var(--ymc-shift, 0));
+  }
+}
+
+@keyframes ymc-marquee-indent {
+  0%,
+  10% {
+    text-indent: 0;
+  }
+  90%,
+  100% {
+    text-indent: var(--ymc-shift, 0);
+  }
+}
+
+.ymc-marquee-x {
+  animation: ymc-marquee-x var(--ymc-duration, 8s) ease-in-out infinite alternate;
+  will-change: transform;
+  text-overflow: clip !important;
+}
+
+.ymc-marquee-indent {
+  animation: ymc-marquee-indent var(--ymc-duration, 8s) ease-in-out infinite alternate;
+  text-align: left !important;
+  text-overflow: clip !important;
+}

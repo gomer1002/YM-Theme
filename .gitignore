@@ -1,0 +1,9 @@
+__pycache__/
+.sandbox/
+theme_live/
+reference/
+backup/
+*.asar
+*.asar.orig
+*.exe.orig
+*.log
