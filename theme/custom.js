@@ -118,6 +118,23 @@
     true,
   );
 
+  // --- клик по названию трека → альбом (как по обложке) ------------------------
+  window.addEventListener(
+    'click',
+    function (event) {
+      var title = event.target.closest('[data-test-id=VIBE_PLAYERBAR_TRACK_NAME]');
+      if (!title) return;
+      var coverLink = document.querySelector(
+        '[class*="VibePage_albumCover"] a[href*="album"], [data-test-id="VIBE_ALBUM_COVER"] a[href*="album"]'
+      );
+      if (!coverLink) return;
+      event.stopImmediatePropagation();
+      event.preventDefault();
+      coverLink.click();
+    },
+    true,
+  );
+
   // --- бегущая строка для длинных названий -----------------------------------
   // Название: внутренний блок шире видимой области — двигаем его transform'ом
   // (родитель обрезает по краям).

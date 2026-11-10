@@ -1,34 +1,47 @@
 /* ==========================================================================
    «Моя волна» — классический плеер и прямой список жанров
    --------------------------------------------------------------------------
-   Порядок правил:
-     1. колесо жанров: узкая колонка, прямой список, компактные строки
-     2. подпись режима над обложкой (пилюля с крестиком)
-     3. сетка плеера: обложка, исполнитель, название, шкала, кнопки
-     4. обложка и заглушка, пока ничего не играет
-     5. название трека, шкала, таймкод
-     6. кнопки; кнопка play в цвет акцента
-     7. фон: свечение и приглушённая заливка от обложки
-     8. плашка версии, всплывашка громкости
-     9. бегущая строка (@keyframes + классы ymc-marquee)
+   Обновлено под 5.126.1: страница «Моя волна» переехала на главный экран.
+   Ключевые изменения против 5.124.1:
+     • колесо жанров стало прямым ребёнком VibePage_root (section.swiper)
+     • в VibePage_meta теперь живут entityMeta (артист) и playerBlock (плеер)
+     • шкала/таймкод переименованы: VibePlayerbarMeta_* → VibePlayerbarTimecodeContent_*
+     • таймкод теперь рисуется как всплывашка у ползунка (ProgressTimecode)
+     • кнопка сброса: VibeResetButton_container → VibeResetButton_root
+     • добавлены data-test-id: VIBE_META, VIBE_ALBUM_COVER, VIBE_DYNAMIC_ARTISTS,
+       VIBE_PLAYERBAR_TIMECODE_SLIDER, WHEEL_DESKTOP, CHANGE_VOLUME_SLIDER
 
-   Классы приложения содержат хеш сборки (VibePage_meta__kWwRE), поэтому
-   селекторы написаны через [class*='...'] и data-test-id — они переживают
-   обновления Музыки.
+   Порядок правил:
+      1. сетка VibePage_root: узкое колесо + широкая зона плеера
+      2. колесо: прямой вертикальный список, компактные строки
+      3. скрыть лишнее: фон-панель, клякса-анимация, карточка «факта», кнопка сброса
+      4. «расплющить» обёртки (display: contents), чтобы элементы легли в сетку
+      5. сетка VibePage_meta: обложка, артист, название, шкала, кнопки
+      6. обложка + заглушка
+      7. название, шкала
+      8. кнопки; play в цвет акцента
+      9. фон: мягкое свечение
+     10. плашка версии, всплывашка громкости
+     11. бегущая строка (@keyframes + классы ymc-marquee)
    ========================================================================== */
 
 [class*='VibePage_root'] {
-
   --ymc-cover: min(48vh, 24rem, calc(100vh - 23rem));
   --ymc-gap: 0.625rem;
   --ymc-wheel: 15rem;
 
+  /* убрать серую дорожку ползунка (track + буфер), оставить только оранжевый прогресс */
+  --ym-slider-color-primary-disabled: transparent;
+  --ym-slider-color-primary-progress: transparent;
+
+  position: relative;
   display: grid !important;
   grid-template: 'wheel meta' 1fr / var(--ymc-wheel) minmax(0, 1fr) !important;
   place-items: stretch !important;
   column-gap: 1.25rem;
 }
 
+/* --- колесо: узкий прямой список ------------------------------------------- */
 [class*='VibePage_root'] > section.swiper {
   display: block !important;
   grid-area: wheel;
@@ -53,7 +66,6 @@
   transform: none !important;
   transition: none !important;
 }
-
 [class*='WheelDesktopItem_root'] {
   width: 100%;
 }
@@ -78,29 +90,12 @@
   width: 2.25rem !important;
   height: 2.25rem !important;
 }
-[class*='WheelItem_coverContainer'] img {
+[class*='WheelItem_coverContainer'] img,
+[class*='WheelItem_coverContainer'] [class*='VibeSmallView_root'] {
   width: 2.25rem !important;
   height: 2.25rem !important;
   border-radius: 0.5rem;
   object-fit: cover;
-}
-
-[class*='WheelDesktop_root'] [class*='PlayButtonWithCover_control'] {
-  opacity: 0 !important;
-  transition: opacity 0.15s ease;
-}
-[class*='WheelDesktop_root'] [class*='WheelItem_root']:hover [class*='PlayButtonWithCover_control'] {
-  opacity: 1 !important;
-}
-[class*='WheelDesktop_root'] [class*='PlayButtonWithCover_playButton'] {
-  width: 1.5rem !important;
-  height: 1.5rem !important;
-  min-width: 0 !important;
-  padding: 0 !important;
-}
-[class*='WheelDesktop_root'] [class*='PlayButtonWithCover_playButtonIcon'] {
-  width: 0.875rem !important;
-  height: 0.875rem !important;
 }
 [class*='WheelItem_entityMeta'] {
   flex: 1 1 auto;
@@ -121,12 +116,71 @@
 .swiper-slide-active [data-test-id='WHEEL_ITEM_TITLE'] {
   color: #fff !important;
 }
+[data-test-id='WHEEL_ITEM_DESCRIPTION'] {
+  display: block !important;
+  font-size: 0.6875rem !important;
+  line-height: 0.875rem !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 
-[class*='VibePage_artistCover'],
+/* play-кнопка на обложке жанра видна только при наведении */
+[class*='WheelDesktop_root'] [class*='PlayButtonWithCover_control'] {
+  opacity: 0 !important;
+  transition: opacity 0.15s ease;
+}
+[class*='WheelDesktop_root'] [class*='WheelItem_root']:hover [class*='PlayButtonWithCover_control'] {
+  opacity: 1 !important;
+}
+[class*='WheelDesktop_root'] [class*='PlayButtonWithCover_playButton'] {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+[class*='WheelDesktop_root'] [class*='PlayButtonWithCover_playButtonIcon'] {
+  width: 0.875rem !important;
+  height: 0.875rem !important;
+}
+
+/* --- скрыть лишнее --------------------------------------------------------- */
+[class*='VibePage_bigCardPanelBackground'],
 [class*='VibePage_words'] {
   display: none !important;
 }
 
+/* --- фоновая анимация («клякса») — мягкое свечение по центру ----------------- */
+[class*='VibeWidgetAnimation_root'] {
+  display: block !important;
+  position: fixed !important;
+  inset-block-start: 50% !important;
+  inset-inline-start: 50% !important;
+  width: 135vh !important;
+  height: 135vh !important;
+  transform: translate(-50%, -50%) !important;
+  opacity: 0.32 !important;
+  mix-blend-mode: screen !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+/* --- расплющить обёртки, чтобы элементы попали в сетку VibePage_meta ------- */
+[class*='VibePage_entityMeta'],
+[class*='VibePage_entityMetaBody'],
+[class*='VibePage_textContainer'],
+[class*='VibeDynamicArtists_root'],
+[class*='VibePage_playerBlock'],
+[data-test-id='VIBE_PLAYERBAR'],
+[class*='VibePlayerBar_progress'],
+[class*='VibePlayerbarTimecodeContent_root'],
+[class*='VibePlayerbarTimecodeContent_center'],
+[class*='VibePlayerBar_progress'] > div:not([class]) {
+  display: contents !important;
+}
+
+/* --- сетка плеера ---------------------------------------------------------- */
 [class*='VibePage_meta'] {
   display: grid !important;
   grid-template-columns: repeat(4, auto) !important;
@@ -149,6 +203,7 @@
   height: 100% !important;
 }
 
+/* --- подпись режима и кнопка сброса (крестик) -------------------------------- */
 [class*='VibePage_context'] {
   grid-area: context;
   position: static !important;
@@ -161,58 +216,39 @@
   opacity: 1 !important;
   transform: none !important;
   pointer-events: auto !important;
-  z-index: 2;
 }
-[class*='VibeResetButton_container'] {
+[class*='VibeResetButton_button'] {
   display: flex;
   align-items: center;
   gap: 0.3125rem;
   padding: 0.125rem 0.5rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.07);
+  border: none;
+  cursor: pointer;
   transition: background-color 0.15s ease;
 }
-[class*='VibeResetButton_container']:hover {
+[class*='VibeResetButton_button']:hover {
   background: rgba(255, 255, 255, 0.12);
 }
-[data-test-id='RESET_VIBE_CONTEXT_STATIC_TEXT'] {
+[class*='VibeResetButton_context'] {
   font-size: 0.6875rem !important;
   line-height: 0.875rem !important;
   font-weight: 500 !important;
   letter-spacing: 0.01em;
   color: rgba(255, 255, 255, 0.62) !important;
-  -webkit-line-clamp: 1 !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: calc(var(--ymc-cover) - 3rem);
 }
-
-[class*='VibePage_entityMeta'],
-[class*='VibePage_entityMetaBody'],
-[class*='VibePage_textContainer'],
-[class*='VibeDynamicArtists_root'],
-[class*='VibePage_playerBlock'],
-[data-test-id='VIBE_PLAYERBAR'],
-[class*='VibePlayerBar_progress'],
-[class*='VibePlayerbarMeta_root'],
-[class*='VibePlayerbarMeta_center'],
-[class*='VibePlayerBar_progress'] > div:not([class]) {
-  display: contents !important;
-  pointer-events: auto !important;
-  opacity: 1 !important;
+[class*='VibeResetButton_icon'] {
+  width: 0.75rem !important;
+  height: 0.75rem !important;
+  color: rgba(255, 255, 255, 0.62) !important;
 }
 
-[class*='VibePlayerbarMeta_center']::before,
-[class*='VibePlayerbarMeta_center']::after {
-  display: none !important;
-  content: none !important;
-}
-
-[class*='VibePlayerbarMeta_explicitMarkContainer'] {
-  display: none !important;
-}
-
+/* --- обложка --------------------------------------------------------------- */
 [class*='VibePage_albumCover'] {
   grid-area: cover;
   position: relative !important;
@@ -229,13 +265,11 @@
   height: 100% !important;
   border-radius: 0 !important;
 }
-
 [class*='VibePage_albumCover']:not(:has(img)) {
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02) 65%);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1.5rem 3.5rem rgba(0, 0, 0, 0.45);
 }
 [class*='VibePage_albumCover']:not(:has(img))::after {
-
   content: '\266A';
   position: absolute;
   inset: 0;
@@ -252,17 +286,18 @@
   display: block;
 }
 
+/* --- артист ---------------------------------------------------------------- */
 [class*='VibeDynamicArtists_root'] > * {
   grid-area: artist;
   display: block !important;
-  max-width: var(--ymc-cover);
+  max-width: var(--ymc-cover) !important;
   font-size: 1.375rem !important;
   line-height: 1.5rem !important;
   font-weight: 500 !important;
   letter-spacing: 0 !important;
   color: rgba(255, 255, 255, 0.72) !important;
   text-align: center !important;
-  overflow: hidden;
+  overflow: hidden !important;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -280,7 +315,15 @@
   overflow: hidden;
   display: inline !important;
 }
+[class*='VibeDynamicArtists_root'] a,
+[class*='VibeDynamicArtists_root'] button {
+  cursor: pointer;
+}
+[class*='VibeDynamicArtists_root'] a:hover {
+  color: #fff !important;
+}
 
+/* --- название трека -------------------------------------------------------- */
 [data-test-id='VIBE_PLAYERBAR_TRACK_NAME'] {
   grid-area: title;
   display: block !important;
@@ -294,8 +337,11 @@
   color: #fff !important;
   text-align: center !important;
   animation: none !important;
-
   opacity: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
 }
 [data-test-id='VIBE_PLAYERBAR_TRACK_NAME'] > [aria-hidden='true'] {
   display: none !important;
@@ -308,14 +354,9 @@
   white-space: nowrap !important;
   overflow: hidden;
   text-overflow: ellipsis;
-  -webkit-line-clamp: 1 !important;
-}
-[data-test-id='VIBE_PLAYERBAR_TRACK_NAME'] {
-  white-space: nowrap !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
+/* --- шкала ----------------------------------------------------------------- */
 input[class*='VibePlayerbarMeta_slider'] {
   grid-area: seek;
   position: relative !important;
@@ -330,19 +371,42 @@ input[class*='VibePlayerbarMeta_slider']::-webkit-slider-thumb {
   opacity: 1;
 }
 
+/* --- убрать серую «фоновую» полосу прогресса (у ползунка и на обложке) ------- */
+[class*='VibePlayerbarTimecodeContent_center']::before,
+[class*='VibePlayerbarTimecodeContent_center']::after,
+[class*='VibePlayerbarTimecodeContent_root']::before,
+[class*='VibePlayerbarTimecodeContent_root']::after,
+[class*='VibePlayerBar_progress']::before,
+[class*='VibePlayerBar_progress']::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* --- значок explicit (18+) рядом с обложкой ---------------------------------- */
+[class*='VibePlayerbarTimecodeContent_explicitMarkContainer'] {
+  display: none !important;
+}
+
+/* --- таймкод: сколько идёт трек и текущая секунда ---------------------------- */
 [data-test-id='VIBE_PLAYERBAR_TIMECODE'] {
   grid-area: time;
   position: static !important;
+  inset: auto !important;
   opacity: 1 !important;
   display: block !important;
-  font-family: inherit !important;
+  transform: none !important;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
   font-size: 0.75rem !important;
   line-height: 1rem !important;
   font-weight: 500 !important;
   letter-spacing: 0.02em;
   color: rgba(255, 255, 255, 0.45) !important;
+  text-align: center !important;
 }
 
+/* --- кнопки управления ----------------------------------------------------- */
 [class*='VibePlayerControls_root'] {
   grid-area: controls;
   display: flex !important;
@@ -372,22 +436,7 @@ button[class*='VibePlayerControls_playButton'] svg {
   color: #000 !important;
 }
 
-[class*='VibePage_bigCardPanelBackground'] {
-  display: none !important;
-}
-[class*='VibeWidgetAnimation_root'] {
-  display: block !important;
-  position: fixed !important;
-  inset-block-start: 50% !important;
-  inset-inline-start: 50% !important;
-  width: 135vh !important;
-  height: 135vh !important;
-  transform: translate(-50%, -50%) !important;
-  opacity: 0.32 !important;
-  mix-blend-mode: screen !important;
-  pointer-events: none !important;
-  z-index: 0 !important;
-}
+/* --- фон: мягкое свечение от акцента --------------------------------------- */
 [class*='VibePage_root']::before {
   content: '';
   position: absolute;
@@ -401,6 +450,7 @@ button[class*='VibePlayerControls_playButton'] svg {
   z-index: 0;
 }
 
+/* --- плашка версии, общий фон ---------------------------------------------- */
 [class*='MainPage_betaSlot'] {
   position: fixed !important;
   inset: auto auto 0.25rem 0.75rem !important;
@@ -420,9 +470,11 @@ button[class*='VibePlayerControls_playButton'] svg {
 
 [class*='CommonLayout_root'] {
   background-color: var(--ym-background-color-primary-enabled-basic, #0b0b13) !important;
-  background-blend-mode: multiply !important;
+  background-image: none !important;
+  background-blend-mode: normal !important;
 }
 
+/* --- всплывашка громкости --------------------------------------------------- */
 [class*='ChangeVolume_wrapperSlider'] {
   background-color: rgba(14, 11, 18, 0.95) !important;
   box-shadow:
@@ -432,6 +484,7 @@ button[class*='VibePlayerControls_playButton'] svg {
   transform-origin: bottom center;
 }
 
+/* --- бегущая строка --------------------------------------------------------- */
 @keyframes ymc-marquee-x {
   0%,
   10% {
